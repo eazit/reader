@@ -176,6 +176,38 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // PWA One-Click Install Handler
+  let deferredPrompt = null;
+  const installBtn = document.getElementById('btn-pwa-install');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (installBtn) installBtn.style.display = 'inline-flex';
+  });
+
+  if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) {
+        showToast('브라우저 메뉴(⋮)에서 [앱 설치] 또는 [홈 화면에 추가]를 눌러주세요.');
+        return;
+      }
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        console.log('[PWA] User accepted install prompt');
+      }
+      deferredPrompt = null;
+      installBtn.style.display = 'none';
+    });
+  }
+
+  window.addEventListener('appinstalled', () => {
+    if (installBtn) installBtn.style.display = 'none';
+    deferredPrompt = null;
+    showToast('Eazit Reader 앱이 성공적으로 설치되었습니다! 🎉');
+  });
+
   // Restore session & Render recent book banner
   (async () => {
     await tryRestoreSession();

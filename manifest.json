@@ -1,14 +1,16 @@
 {
+  "id": "eazit-reader-app",
   "name": "Eazit Reader",
   "short_name": "Eazit",
   "description": "클라우드 동기화 웹소설 & EPUB 스마트 뷰어",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
+  "display_override": ["standalone", "fullscreen"],
   "orientation": "any",
   "background_color": "#0b0f19",
   "theme_color": "#0ea5e9",
-  "categories": ["books", "entertainment", "productivity"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "assets/favicon.png",
@@ -19,13 +21,19 @@
       "src": "assets/logo.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "assets/logo.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "assets/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
