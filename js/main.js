@@ -182,31 +182,36 @@ window.addEventListener('DOMContentLoaded', () => {
   // PWA One-Click Install Handler
   let deferredPrompt = null;
   const installBtn = document.getElementById('btn-pwa-install');
+  const heroInstallBtn = document.getElementById('btn-hero-install-app');
 
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
     if (installBtn) installBtn.style.display = 'inline-flex';
+    if (heroInstallBtn) heroInstallBtn.style.display = 'inline-flex';
   });
 
-  if (installBtn) {
-    installBtn.addEventListener('click', async () => {
-      if (!deferredPrompt) {
-        showToast('브라우저 메뉴(⋮)에서 [앱 설치] 또는 [홈 화면에 추가]를 눌러주세요.');
-        return;
-      }
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        console.log('[PWA] User accepted install prompt');
-      }
-      deferredPrompt = null;
-      installBtn.style.display = 'none';
-    });
-  }
+  const triggerInstall = async () => {
+    if (!deferredPrompt) {
+      showToast('스마트폰 브라우저 우측 상단 메뉴(⋮)에서 [앱 설치]를 터치해주세요!');
+      return;
+    }
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      console.log('[PWA] User accepted install prompt');
+    }
+    deferredPrompt = null;
+    if (installBtn) installBtn.style.display = 'none';
+    if (heroInstallBtn) heroInstallBtn.style.display = 'none';
+  };
+
+  if (installBtn) installBtn.addEventListener('click', triggerInstall);
+  if (heroInstallBtn) heroInstallBtn.addEventListener('click', triggerInstall);
 
   window.addEventListener('appinstalled', () => {
     if (installBtn) installBtn.style.display = 'none';
+    if (heroInstallBtn) heroInstallBtn.style.display = 'none';
     deferredPrompt = null;
     showToast('Eazit Reader 앱이 성공적으로 설치되었습니다! 🎉');
   });
