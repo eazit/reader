@@ -31,6 +31,12 @@ export function initGIS() {
   }
 }
 
+// Auto-initialize when GSI script finishes loading
+window.__onGsiLoaded = () => {
+  console.log('[GIS] GSI script loaded via hook.');
+  initGIS();
+};
+
 async function handleTokenResponse(response) {
   if (response.error) {
     console.error('[GIS] Auth Error:', response);
@@ -39,7 +45,8 @@ async function handleTokenResponse(response) {
       console.log('[GIS] Silent re-auth failed, staying logged out.');
       return;
     }
-    showToast(`로그인 실패: ${response.error_description || response.error}`);
+    const errText = response.error_description || response.error || '알 수 없는 오류';
+    showToast(`로그인 실패: ${errText}`);
     updateSyncBadge('error', '로그인 오류');
     return;
   }
@@ -73,9 +80,14 @@ export function triggerGoogleLogin() {
   }
 
   if (tokenClient) {
-    tokenClient.requestAccessToken({ prompt: State.accessToken ? '' : 'consent' });
+    try {
+      tokenClient.requestAccessToken({ prompt: State.accessToken ? '' : 'select_account' });
+    } catch (e) {
+      console.error('[GIS] requestAccessToken error:', e);
+      showToast('로그인 창을 여는 중 오류가 발생했습니다.');
+    }
   } else {
-    showToast('Google 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+    showToast('Google 인증 서비스를 준비 중입니다. 1~2초 후 다시 눌러주세요.');
   }
 }
 

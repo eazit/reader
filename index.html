@@ -29,7 +29,7 @@
   <!-- External Libraries (ePub.js, JSZip, Google Identity Services) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js"></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer onload="window.__onGsiLoaded && window.__onGsiLoaded()"></script>
 </head>
 <body>
 
