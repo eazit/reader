@@ -100,9 +100,7 @@ export function handleEpubIframeClick(e) {
       toggleToolbar();
     }
   } else {
-    if (clickX >= width * 0.25 && clickX <= width * 0.75) {
-      toggleToolbar();
-    }
+    toggleToolbar();
   }
 }
 

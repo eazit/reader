@@ -102,22 +102,41 @@ export function initTxtScrollTracker() {
     });
   }, { passive: true });
 
-  // Light tap on screen to toggle toolbars in scroll mode
-  let touchStartPos = { x: 0, y: 0, time: 0 };
+  // Reliable Tap Detection on Screen to Toggle Menus
+  let isScrolling = false;
+  let touchStartTime = 0;
+  let touchStartPos = { x: 0, y: 0 };
+
   txtArea.addEventListener('touchstart', e => {
+    isScrolling = false;
+    touchStartTime = Date.now();
     if (e.touches && e.touches[0]) {
-      touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY, time: Date.now() };
+      touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     }
   }, { passive: true });
 
+  txtArea.addEventListener('touchmove', () => {
+    isScrolling = true;
+  }, { passive: true });
+
   txtArea.addEventListener('touchend', e => {
-    if (e.changedTouches && e.changedTouches[0]) {
-      const dx = Math.abs(e.changedTouches[0].clientX - touchStartPos.x);
-      const dy = Math.abs(e.changedTouches[0].clientY - touchStartPos.y);
-      const dt = Date.now() - touchStartPos.time;
-      if (dx < 12 && dy < 12 && dt < 280) {
+    if (!isScrolling) {
+      const elapsed = Date.now() - touchStartTime;
+      const t = e.changedTouches && e.changedTouches[0] ? e.changedTouches[0] : null;
+      let dist = 0;
+      if (t) {
+        dist = Math.hypot(t.clientX - touchStartPos.x, t.clientY - touchStartPos.y);
+      }
+      if (elapsed < 450 && dist < 30) {
         toggleToolbar();
       }
     }
   }, { passive: true });
+
+  // Desktop click support
+  txtArea.addEventListener('click', () => {
+    const sel = window.getSelection();
+    if (sel && sel.toString().trim().length > 0) return;
+    toggleToolbar();
+  });
 }
