@@ -10,8 +10,8 @@ import { loadEpubBook } from './reader-epub.js';
 import { loadTxtBook, initTxtScrollTracker } from './reader-txt.js';
 import { SearchEngine } from './search.js';
 import { 
-  applyTheme, setFontSize, setReadMode, showToast, showLoading,
-  openToc, closeToc, openSettingsModal, closeSettingsModal, toggleToolbar, setToolbarVisibility,
+  applyTheme, setFontSize, setReadMode, setFontFamily, setLineHeight, applyAllSavedSettings,
+  showToast, showLoading, openToc, closeToc, openSettingsModal, closeSettingsModal, toggleToolbar, setToolbarVisibility,
   renderRecentBookBanner, saveLastRead, updateSyncBadge, toggleFullscreen,
   isMobileDevice, isPwaMode, requestFullscreenMode, setAutoFullscreenMobile
 } from './ui.js';
@@ -163,10 +163,8 @@ window.addEventListener('DOMContentLoaded', () => {
   // Ensure default state is clean library view
   switchToLibraryView();
 
-  // Apply saved theme & typography
-  applyTheme(State.settings.theme);
-  setFontSize(State.settings.fontSize);
-  setReadMode(State.settings.readMode);
+  // Apply all saved theme, font size, font family, line height, reading mode, and fullscreen settings
+  applyAllSavedSettings();
 
   // Initialize TXT Scroll Tracker
   initTxtScrollTracker();
@@ -399,28 +397,16 @@ window.addEventListener('DOMContentLoaded', () => {
   // Modal Font Family Buttons
   document.querySelectorAll('#settings-font-group .btn-group-item').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('#settings-font-group .btn-group-item').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
       // @ts-ignore
-      State.settings.fontFamily = btn.dataset.font;
-      // @ts-ignore
-      localStorage.setItem('eazit_fontFamily', btn.dataset.font);
-      if (State.fileType === 'epub') applyEpubStyles();
-      if (State.fileType === 'txt') applyTxtStyles();
+      setFontFamily(btn.dataset.font);
     });
   });
 
   // Modal Line Height Buttons
   document.querySelectorAll('#settings-lh-group .btn-group-item').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('#settings-lh-group .btn-group-item').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
       // @ts-ignore
-      const lh = parseFloat(btn.dataset.lh);
-      State.settings.lineHeight = lh;
-      localStorage.setItem('eazit_lineHeight', String(lh));
-      if (State.fileType === 'epub') applyEpubStyles();
-      if (State.fileType === 'txt') applyTxtStyles();
+      setLineHeight(btn.dataset.lh);
     });
   });
 

@@ -2,7 +2,7 @@
  * Eazit Reader - Service Worker (PWA Offline & App Lifecycle)
  */
 
-const CACHE_NAME = 'eazit-reader-v2';
+const CACHE_NAME = 'eazit-reader-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

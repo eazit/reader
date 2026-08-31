@@ -83,15 +83,7 @@ export function closeToc() {
 }
 
 export function openSettingsModal() {
-  const input = document.getElementById('input-custom-client-id');
-  if (input) {
-    // @ts-ignore
-    input.value = localStorage.getItem('eazit_google_client_id') || '';
-  }
-  document.querySelectorAll('#settings-fullscreen-group .btn-group-item').forEach(btn => {
-    // @ts-ignore
-    btn.classList.toggle('active', btn.dataset.autoFs === String(State.settings.autoFullscreenMobile));
-  });
+  syncSettingsUI();
   document.getElementById('settings-modal')?.classList.add('open');
 }
 
@@ -208,6 +200,90 @@ export function setReadMode(mode) {
   if (State.fileType === 'epub' && State.currentFile && State.currentFile.buffer) {
     loadEpubBook(State.currentFile.buffer, State.lastSavedPayload ? JSON.stringify(State.lastSavedPayload) : State.currentFile.description);
   }
+}
+
+export function setFontFamily(family) {
+  State.settings.fontFamily = family;
+  localStorage.setItem('eazit_fontFamily', family);
+
+  document.querySelectorAll('#settings-font-group .btn-group-item').forEach(btn => {
+    // @ts-ignore
+    btn.classList.toggle('active', btn.dataset.font === family);
+  });
+
+  if (State.fileType === 'epub') applyEpubStyles();
+  if (State.fileType === 'txt') applyTxtStyles();
+}
+
+export function setLineHeight(lh) {
+  const val = parseFloat(String(lh));
+  State.settings.lineHeight = val;
+  localStorage.setItem('eazit_lineHeight', String(val));
+
+  document.querySelectorAll('#settings-lh-group .btn-group-item').forEach(btn => {
+    // @ts-ignore
+    btn.classList.toggle('active', parseFloat(btn.dataset.lh) === val);
+  });
+
+  if (State.fileType === 'epub') applyEpubStyles();
+  if (State.fileType === 'txt') applyTxtStyles();
+}
+
+export function syncSettingsUI() {
+  // Theme
+  document.documentElement.setAttribute('data-theme', State.settings.theme);
+  document.querySelectorAll('#settings-theme-group .btn-group-item').forEach(btn => {
+    // @ts-ignore
+    btn.classList.toggle('active', btn.dataset.theme === State.settings.theme);
+  });
+
+  // Font Size
+  const modalEl = document.getElementById('modal-font-size-label');
+  if (modalEl) modalEl.textContent = `${State.settings.fontSize}px`;
+
+  // Font Family
+  document.querySelectorAll('#settings-font-group .btn-group-item').forEach(btn => {
+    // @ts-ignore
+    btn.classList.toggle('active', btn.dataset.font === State.settings.fontFamily);
+  });
+
+  // Line Height
+  document.querySelectorAll('#settings-lh-group .btn-group-item').forEach(btn => {
+    // @ts-ignore
+    btn.classList.toggle('active', parseFloat(btn.dataset.lh) === State.settings.lineHeight);
+  });
+
+  // Read Mode
+  const touchOverlay = document.getElementById('touch-overlay');
+  if (touchOverlay) {
+    touchOverlay.classList.toggle('page-mode-active', State.settings.readMode === 'page');
+  }
+  document.querySelectorAll('#settings-mode-group .btn-group-item').forEach(btn => {
+    // @ts-ignore
+    btn.classList.toggle('active', btn.dataset.mode === State.settings.readMode);
+  });
+
+  // Fullscreen
+  document.querySelectorAll('#settings-fullscreen-group .btn-group-item').forEach(btn => {
+    // @ts-ignore
+    btn.classList.toggle('active', btn.dataset.autoFs === String(State.settings.autoFullscreenMobile));
+  });
+
+  // Client ID
+  const input = document.getElementById('input-custom-client-id');
+  if (input) {
+    // @ts-ignore
+    input.value = localStorage.getItem('eazit_google_client_id') || '';
+  }
+}
+
+export function applyAllSavedSettings() {
+  applyTheme(State.settings.theme);
+  setFontSize(State.settings.fontSize);
+  setFontFamily(State.settings.fontFamily);
+  setLineHeight(State.settings.lineHeight);
+  setReadMode(State.settings.readMode);
+  syncSettingsUI();
 }
 
 export function getFontFamilyCss(type) {
