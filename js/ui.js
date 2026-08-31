@@ -328,3 +328,24 @@ export async function resumeLastRead() {
     showToast('소설을 불러오는 중 오류가 발생했습니다.');
   }
 }
+
+export function toggleFullscreen() {
+  // @ts-ignore
+  if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(() => {});
+      // @ts-ignore
+    } else if (document.documentElement.webkitRequestFullscreen) {
+      // @ts-ignore
+      document.documentElement.webkitRequestFullscreen();
+    }
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+      // @ts-ignore
+    } else if (document.webkitExitFullscreen) {
+      // @ts-ignore
+      document.webkitExitFullscreen();
+    }
+  }
+}

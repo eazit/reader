@@ -12,7 +12,7 @@ import { SearchEngine } from './search.js';
 import { 
   applyTheme, setFontSize, setReadMode, showToast, showLoading,
   openToc, closeToc, openSettingsModal, closeSettingsModal, toggleToolbar, setToolbarVisibility,
-  renderRecentBookBanner, saveLastRead, updateSyncBadge
+  renderRecentBookBanner, saveLastRead, updateSyncBadge, toggleFullscreen
 } from './ui.js';
 
 // Safe Event Listener Helper
@@ -323,6 +323,9 @@ window.addEventListener('DOMContentLoaded', () => {
   safeOn('btn-open-toc', 'click', openToc);
   safeOn('btn-close-toc', 'click', closeToc);
   safeOn('toc-overlay', 'click', closeToc);
+
+  // Fullscreen Toggle
+  safeOn('btn-toggle-fullscreen', 'click', toggleFullscreen);
 
   // In-Book Search Triggers
   safeOn('btn-open-search', 'click', () => {
