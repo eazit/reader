@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.png" width="120" height="120" alt="Eazit Reader Logo" style="border-radius: 24px;" />
+</p>
+
 # Eazit Reader (이지릿 리더)
 
 > Google Drive 실시간 동기화 & 고속 오프라인 캐시를 지원하는 차세대 크로스 플랫폼 웹소설(.txt) 및 전자책(.epub) 뷰어
