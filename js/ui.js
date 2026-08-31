@@ -88,6 +88,10 @@ export function openSettingsModal() {
     // @ts-ignore
     input.value = localStorage.getItem('eazit_google_client_id') || '';
   }
+  document.querySelectorAll('#settings-fullscreen-group .btn-group-item').forEach(btn => {
+    // @ts-ignore
+    btn.classList.toggle('active', btn.dataset.autoFs === String(State.settings.autoFullscreenMobile));
+  });
   document.getElementById('settings-modal')?.classList.add('open');
 }
 
@@ -329,7 +333,19 @@ export async function resumeLastRead() {
   }
 }
 
-export function toggleFullscreen() {
+export function isMobileDevice() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    (window.matchMedia && window.matchMedia('(max-width: 768px)').matches && 'ontouchstart' in window);
+}
+
+export function isPwaMode() {
+  return window.matchMedia('(display-mode: standalone)').matches ||
+         window.matchMedia('(display-mode: fullscreen)').matches ||
+         // @ts-ignore
+         window.navigator.standalone === true;
+}
+
+export function requestFullscreenMode() {
   // @ts-ignore
   if (!document.fullscreenElement && !document.webkitFullscreenElement) {
     if (document.documentElement.requestFullscreen) {
@@ -339,6 +355,22 @@ export function toggleFullscreen() {
       // @ts-ignore
       document.documentElement.webkitRequestFullscreen();
     }
+  }
+}
+
+export function setAutoFullscreenMobile(enabled) {
+  State.settings.autoFullscreenMobile = enabled;
+  localStorage.setItem('eazit_auto_fullscreen', enabled ? 'true' : 'false');
+  document.querySelectorAll('#settings-fullscreen-group .btn-group-item').forEach(btn => {
+    // @ts-ignore
+    btn.classList.toggle('active', btn.dataset.autoFs === String(enabled));
+  });
+}
+
+export function toggleFullscreen() {
+  // @ts-ignore
+  if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+    requestFullscreenMode();
   } else {
     if (document.exitFullscreen) {
       document.exitFullscreen().catch(() => {});

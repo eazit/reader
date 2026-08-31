@@ -4,8 +4,10 @@
 
 import { State } from './config.js';
 import { scheduleDriveSync } from './auth.js';
-import { updateProgressUI, showToast, hideLoading, renderToc, toggleToolbar, getFontFamilyCss } from './ui.js';
+import { updateProgressUI, showToast, hideLoading, renderToc, toggleToolbar, setToolbarVisibility, getFontFamilyCss } from './ui.js';
 import { prevPage, nextPage, handleTouchStart, handleTouchEnd } from './main.js';
+
+let lastEpubTouchEndTime = 0;
 
 export async function loadEpubBook(arrayBuffer, savedDescription) {
   State.fileType = 'epub';
@@ -29,6 +31,9 @@ export async function loadEpubBook(arrayBuffer, savedDescription) {
   });
 
   applyEpubStyles();
+
+  // Attach hooks to every rendered section/iframe
+  State.rendition.hooks.content.register(attachEpubContentListeners);
 
   let startCfi = null;
   if (savedDescription) {
@@ -76,25 +81,92 @@ export async function loadEpubBook(arrayBuffer, savedDescription) {
     });
   });
 
-  State.rendition.on('rendered', () => {
-    try {
-      const doc = State.rendition.getContents()[0]?.document;
-      if (doc) {
-        doc.addEventListener('click', handleEpubIframeClick);
-        doc.addEventListener('touchstart', handleTouchStart, { passive: true });
-        doc.addEventListener('touchend', handleTouchEnd, { passive: true });
+  // Attach container scroll auto-hide
+  if (container) {
+    let lastEpubScroll = 0;
+    container.addEventListener('scroll', () => {
+      if (State.toolbarVisible && State.settings.readMode === 'scroll') {
+        const cur = container.scrollTop;
+        if (Math.abs(cur - lastEpubScroll) > 12) {
+          setToolbarVisibility(false);
+        }
+        lastEpubScroll = cur;
       }
-    } catch (e) {}
-  });
+    }, { passive: true });
+  }
 }
 
-export function handleEpubIframeClick(e) {
+export function attachEpubContentListeners(contents) {
+  try {
+    const doc = contents.document;
+    if (!doc) return;
+
+    let isScrolling = false;
+    let touchStartTime = 0;
+    let touchStartPos = { x: 0, y: 0 };
+
+    doc.addEventListener('touchstart', e => {
+      isScrolling = false;
+      touchStartTime = Date.now();
+      if (e.touches && e.touches[0]) {
+        touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }
+      handleTouchStart(e);
+    }, { passive: true });
+
+    doc.addEventListener('touchmove', e => {
+      if (e.touches && e.touches[0]) {
+        const moveDist = Math.hypot(e.touches[0].clientX - touchStartPos.x, e.touches[0].clientY - touchStartPos.y);
+        if (moveDist > 10) {
+          isScrolling = true;
+        }
+      }
+    }, { passive: true });
+
+    doc.addEventListener('touchend', e => {
+      if (!isScrolling) {
+        const elapsed = Date.now() - touchStartTime;
+        const t = e.changedTouches && e.changedTouches[0] ? e.changedTouches[0] : null;
+        let dist = 0;
+        if (t) {
+          dist = Math.hypot(t.clientX - touchStartPos.x, t.clientY - touchStartPos.y);
+        }
+        if (elapsed < 400 && dist < 20) {
+          lastEpubTouchEndTime = Date.now();
+          handleEpubTap(t ? t.clientX : window.innerWidth / 2);
+        }
+      }
+      handleTouchEnd(e);
+    }, { passive: true });
+
+    doc.addEventListener('click', e => {
+      if (Date.now() - lastEpubTouchEndTime < 450) return;
+      const sel = doc.getSelection ? doc.getSelection() : window.getSelection();
+      if (sel && sel.toString().trim().length > 0) return;
+      handleEpubTap(e.clientX);
+    });
+
+    let lastDocScroll = 0;
+    doc.addEventListener('scroll', () => {
+      if (State.toolbarVisible && State.settings.readMode === 'scroll') {
+        const cur = doc.documentElement.scrollTop || doc.body.scrollTop || 0;
+        if (Math.abs(cur - lastDocScroll) > 12) {
+          setToolbarVisibility(false);
+        }
+        lastDocScroll = cur;
+      }
+    }, { passive: true });
+  } catch (e) {
+    console.warn('[EPUB] Listener attachment error:', e);
+  }
+}
+
+export function handleEpubTap(clientX) {
   const width = window.innerWidth;
-  const clickX = e.clientX;
   if (State.settings.readMode === 'page') {
-    if (clickX < width * 0.25) {
+    if (clientX < width * 0.25) {
       prevPage();
-    } else if (clickX > width * 0.75) {
+    } else if (clientX > width * 0.75) {
       nextPage();
     } else {
       toggleToolbar();

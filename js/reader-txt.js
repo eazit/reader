@@ -4,7 +4,7 @@
 
 import { State } from './config.js';
 import { scheduleDriveSync } from './auth.js';
-import { updateProgressUI, hideLoading, renderToc, getFontFamilyCss } from './ui.js';
+import { updateProgressUI, hideLoading, renderToc, getFontFamilyCss, toggleToolbar, setToolbarVisibility } from './ui.js';
 
 export function loadTxtBook(textContent, savedDescription) {
   try {
@@ -78,10 +78,12 @@ export function generateTxtToc(text) {
   renderToc(tocItems);
 }
 
-// Attach Scroll Tracker
+// Attach Scroll Tracker & Reliable Tap Detection
 export function initTxtScrollTracker() {
   const txtArea = document.getElementById('txt-render-area');
   if (!txtArea) return;
+
+  let lastScrollTop = 0;
 
   txtArea.addEventListener('scroll', () => {
     if (State.fileType !== 'txt' || State.isRestoringPosition) return;
@@ -100,12 +102,20 @@ export function initTxtScrollTracker() {
       scrollHeight: scrollHeight,
       updatedAt: Date.now()
     });
+
+    // Auto-hide toolbar while scrolling for full immersion
+    const currentScrollTop = txtArea.scrollTop;
+    if (Math.abs(currentScrollTop - lastScrollTop) > 12 && State.toolbarVisible) {
+      setToolbarVisibility(false);
+    }
+    lastScrollTop = currentScrollTop;
   }, { passive: true });
 
-  // Reliable Tap Detection on Screen to Toggle Menus
+  // Reliable Tap Detection on Screen to Toggle Menus without Double Triggering
   let isScrolling = false;
   let touchStartTime = 0;
   let touchStartPos = { x: 0, y: 0 };
+  let lastTouchEndTime = 0;
 
   txtArea.addEventListener('touchstart', e => {
     isScrolling = false;
@@ -115,8 +125,13 @@ export function initTxtScrollTracker() {
     }
   }, { passive: true });
 
-  txtArea.addEventListener('touchmove', () => {
-    isScrolling = true;
+  txtArea.addEventListener('touchmove', e => {
+    if (e.touches && e.touches[0]) {
+      const moveDist = Math.hypot(e.touches[0].clientX - touchStartPos.x, e.touches[0].clientY - touchStartPos.y);
+      if (moveDist > 10) {
+        isScrolling = true;
+      }
+    }
   }, { passive: true });
 
   txtArea.addEventListener('touchend', e => {
@@ -127,14 +142,16 @@ export function initTxtScrollTracker() {
       if (t) {
         dist = Math.hypot(t.clientX - touchStartPos.x, t.clientY - touchStartPos.y);
       }
-      if (elapsed < 450 && dist < 30) {
+      if (elapsed < 400 && dist < 20) {
+        lastTouchEndTime = Date.now();
         toggleToolbar();
       }
     }
   }, { passive: true });
 
-  // Desktop click support
+  // Desktop click support (ignores synthetic clicks following touch tap or active text selections)
   txtArea.addEventListener('click', () => {
+    if (Date.now() - lastTouchEndTime < 450) return;
     const sel = window.getSelection();
     if (sel && sel.toString().trim().length > 0) return;
     toggleToolbar();

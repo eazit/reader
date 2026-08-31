@@ -12,7 +12,8 @@ import { SearchEngine } from './search.js';
 import { 
   applyTheme, setFontSize, setReadMode, showToast, showLoading,
   openToc, closeToc, openSettingsModal, closeSettingsModal, toggleToolbar, setToolbarVisibility,
-  renderRecentBookBanner, saveLastRead, updateSyncBadge, toggleFullscreen
+  renderRecentBookBanner, saveLastRead, updateSyncBadge, toggleFullscreen,
+  isMobileDevice, isPwaMode, requestFullscreenMode, setAutoFullscreenMobile
 } from './ui.js';
 
 // Safe Event Listener Helper
@@ -29,6 +30,11 @@ export function switchToReaderView(title) {
   const titleEl = document.getElementById('reader-title-text');
   if (titleEl) titleEl.textContent = title;
   setToolbarVisibility(true);
+
+  // Auto Fullscreen on Mobile / PWA
+  if (State.settings.autoFullscreenMobile && (isMobileDevice() || isPwaMode())) {
+    requestFullscreenMode();
+  }
 }
 
 export function switchToLibraryView() {
@@ -415,6 +421,16 @@ window.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('eazit_lineHeight', String(lh));
       if (State.fileType === 'epub') applyEpubStyles();
       if (State.fileType === 'txt') applyTxtStyles();
+    });
+  });
+
+  // Modal Mobile Auto Fullscreen Buttons
+  document.querySelectorAll('#settings-fullscreen-group .btn-group-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      // @ts-ignore
+      const isAuto = btn.dataset.autoFs === 'true';
+      setAutoFullscreenMobile(isAuto);
+      showToast(isAuto ? '모바일/PWA 열람 시 자동 전체화면이 활성화되었습니다.' : '전체화면 수동 모드로 설정되었습니다.');
     });
   });
 

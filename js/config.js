@@ -32,6 +32,7 @@ export const State = {
     fontFamily: localStorage.getItem('eazit_fontFamily') || 'sans',
     lineHeight: parseFloat(localStorage.getItem('eazit_lineHeight') || '1.8'),
     readMode: localStorage.getItem('eazit_readMode') || 'scroll', // 'scroll' | 'page'
+    autoFullscreenMobile: localStorage.getItem('eazit_auto_fullscreen') !== 'false', // default true
   },
 
   // Sync Engine State
