@@ -1,0 +1,64 @@
+/* ==========================================================================
+   In-Book Search Bar Overlay & Content Highlights
+   ========================================================================== */
+.reader-search-bar {
+  position: absolute;
+  top: calc(64px + var(--safe-top));
+  left: 50%;
+  transform: translateX(-50%) translateY(-12px);
+  width: calc(100% - 2rem);
+  max-width: 480px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-main);
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg);
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 120;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reader-search-bar.open {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.search-input-field {
+  flex: 1;
+  height: 36px;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--text-main);
+}
+
+.search-count-badge {
+  font-size: 0.775rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  white-space: nowrap;
+  min-width: 45px;
+  text-align: center;
+}
+
+/* Search Highlights in Content */
+mark.search-highlight {
+  background-color: rgba(253, 224, 71, 0.6);
+  color: inherit;
+  border-radius: 3px;
+  padding: 1px 2px;
+  transition: background-color 0.2s;
+}
+
+mark.search-highlight.active-match {
+  background-color: #f97316 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 2px #f97316;
+}

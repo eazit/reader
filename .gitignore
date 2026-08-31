@@ -1,0 +1,14 @@
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# IDE & Gemini Tooling
+.vscode/
+.idea/
+.gemini/
+.system_generated/
+*.log
+
+# Temp Files
+*.tmp
+*.bak
