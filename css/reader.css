@@ -76,7 +76,7 @@
   -webkit-overflow-scrolling: touch;
 }
 
-/* TXT Container */
+/* TXT Container (Buttery-smooth 1:1 Native Touch Momentum Scrolling) */
 #txt-render-area {
   width: 100%;
   height: 100%;
@@ -84,8 +84,9 @@
   overflow-x: hidden;
   display: none;
   padding: calc(4rem + var(--safe-top)) 1.5rem calc(5rem + var(--safe-bottom));
-  scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
   user-select: text;
 }
 
@@ -109,11 +110,16 @@
   pointer-events: none;
 }
 
+/* Page mode enables touch zones; Scroll mode lets touch pass directly to content */
+.touch-overlay.page-mode-active .touch-zone {
+  pointer-events: auto;
+}
+
 .touch-zone {
   height: 100%;
   cursor: pointer;
   touch-action: pan-y;
-  pointer-events: auto;
+  pointer-events: none;
 }
 
 .touch-zone-left {

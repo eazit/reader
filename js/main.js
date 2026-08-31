@@ -129,6 +129,9 @@ export function handleTouchStart(e) {
 
 export function handleTouchEnd(e) {
   if (State.currentView !== 'reader') return;
+  // In scroll mode, let native momentum scrolling handle 100% of gestures without interception
+  if (State.settings.readMode === 'scroll') return;
+
   const touch = e.changedTouches ? e.changedTouches[0] : e;
   const diffX = touch.clientX - touchStartX;
   const diffY = touch.clientY - touchStartY;
@@ -141,7 +144,7 @@ export function handleTouchEnd(e) {
         else nextPage();
       }
     } else {
-      if (State.settings.readMode === 'page' && Math.abs(diffY) > 50) {
+      if (Math.abs(diffY) > 50) {
         if (diffY < 0) nextPage();
         else prevPage();
       }

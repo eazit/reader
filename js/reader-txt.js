@@ -101,4 +101,23 @@ export function initTxtScrollTracker() {
       updatedAt: Date.now()
     });
   }, { passive: true });
+
+  // Light tap on screen to toggle toolbars in scroll mode
+  let touchStartPos = { x: 0, y: 0, time: 0 };
+  txtArea.addEventListener('touchstart', e => {
+    if (e.touches && e.touches[0]) {
+      touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY, time: Date.now() };
+    }
+  }, { passive: true });
+
+  txtArea.addEventListener('touchend', e => {
+    if (e.changedTouches && e.changedTouches[0]) {
+      const dx = Math.abs(e.changedTouches[0].clientX - touchStartPos.x);
+      const dy = Math.abs(e.changedTouches[0].clientY - touchStartPos.y);
+      const dt = Date.now() - touchStartPos.time;
+      if (dx < 12 && dy < 12 && dt < 280) {
+        toggleToolbar();
+      }
+    }
+  }, { passive: true });
 }

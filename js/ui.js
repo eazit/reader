@@ -185,6 +185,12 @@ export function setReadMode(mode) {
   State.settings.readMode = mode;
   localStorage.setItem('eazit_readMode', mode);
 
+  // Update touch-overlay interaction mode
+  const touchOverlay = document.getElementById('touch-overlay');
+  if (touchOverlay) {
+    touchOverlay.classList.toggle('page-mode-active', mode === 'page');
+  }
+
   document.querySelectorAll('#settings-mode-group .btn-group-item').forEach(btn => {
     // @ts-ignore
     btn.classList.toggle('active', btn.dataset.mode === mode);
